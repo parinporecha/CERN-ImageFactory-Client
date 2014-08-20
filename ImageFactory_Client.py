@@ -6,7 +6,8 @@ import requests
 import sys
 import json
 
-IMAGE_BUILDER_BASE_URL = 'http://lxbst0518.cern.ch:8075'
+# For HTTP requests, replace the 'https://' below with 'http://'
+IMAGE_BUILDER_BASE_URL = 'https://lxbst0518.cern.ch:8075'
 BASE_URL = IMAGE_BUILDER_BASE_URL + '/imagefactory'
 PROVIDER_IMAGE_SUFFIX = '/provider_images'
 
@@ -14,9 +15,13 @@ REQUEST_SUCCESSFUL_MESSAGE = "Request Successful"
 REQUEST_FAIL_MESSAGE = "Request failed"
 
 UPLOAD_TARGET = 'openstack-kvm'
+CERN_CERTIFICATE = '/etc/pki/tls/certs/CERN-bundle.pem'
 
 def print_imagefactory_version():
-    r = requests.get(BASE_URL)
+    r = requests.get(BASE_URL, verify=CERN_CERTIFICATE)
+
+    # For HTTP requests, comment the above line, and uncomment the below one
+    #r = requests.get(BASE_URL)
     if (r.status_code == 200):
         print REQUEST_SUCCESSFUL_MESSAGE
     else:
@@ -43,7 +48,10 @@ def build_and_upload_image():
     parameters = json.dumps({'install_script' : kickstart_file})
     
     payload = {'target': UPLOAD_TARGET, 'provider': provider_definition, 'credentials': openrc_credentials, 'template': template, 'parameters': parameters}
-    r = requests.post(BASE_URL + PROVIDER_IMAGE_SUFFIX, data = payload)
+    r = requests.post(BASE_URL + PROVIDER_IMAGE_SUFFIX, data = payload, verify=CERN_CERTIFICATE)
+    
+    # For HTTP requests, comment the above line, and uncomment the below one
+    #r = requests.post(BASE_URL + PROVIDER_IMAGE_SUFFIX, data = payload)
     if (r.status_code == 202):
         print REQUEST_SUCCESSFUL_MESSAGE
     else:
